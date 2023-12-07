@@ -1,11 +1,12 @@
 #!/bin/bash
+
 # Ask the user for login details
 vhost="/opt/homebrew/etc/httpd/original/extra/httpd-vhosts.conf"
-HOSTFILE = "/etc/hosts"
+HOSTFILE="/etc/hosts"
 
 cat <<EOF
 
-__      ___      _               _   _    _           _   
+___      _               _   _    _           _   
 \\ \\    / (_)    | |             | | | |  | |         | |  
  \\ \\  / / _ _ __| |_ _   _  __ _| | | |__| | ___  ___| |_ 
   \\ \\/ / | | '__| __| | | |/ _\` | | |  __  |/ _ \\/ __| __|
@@ -14,21 +15,21 @@ __      ___      _               _   _    _           _
 
 EOF
 
+echo "Available Hosts:"
 
-echo "Already avilable Hosts"
-
-cat $HOSTFILE
 
 # Asking for details
 
 read -p 'Enter project Location: ' projectLocation
 read -p 'Enter Host Name: ' hostName
 
-# storing  Vhost Detials
+# Storing virtual host details
+
 multiline_content=$(cat <<EOF
-<VirtualHost  0.0.0.0>
+
+<VirtualHost 0.0.0.0>
     DocumentRoot "$projectLocation"
-    ServerName  $hostName
+    ServerName $hostName
     <Directory "$projectLocation">
         AllowOverride All
         Order allow,deny
@@ -36,34 +37,27 @@ multiline_content=$(cat <<EOF
         Require all granted
     </Directory>
 </VirtualHost>
+
 EOF
 )
 
-writingHostAndVhostFile(){
-     echo "$multiline_content" >> $vhost
+writingHostAndVhostFile() {
+    echo "$multiline_content" >> $vhost
 
-    echo  "127.0.0.1 $hostName">  $HOSTFILE
+   sudo echo "127.0.0.1 $hostName" >> $HOSTFILE
 }
 
-reStartServices(){
-    echo `eval(sudo apachectl restart)`
+restartingServices() {
+    echo "Restarting Apache..."
+    sudo apachectl restart
 
-    echo `eval(http-restart)`
+    echo "Restarting httpd..."
+    http-restart
 }
-
-
 
 if grep -q "$hostName" "$vhost"; then
-    echo "Host is already setup with $hostName"
+    echo "Host $hostName already exists."
 else
     writingHostAndVhostFile
-    reStartServices
+    restartingServices
 fi
-
-# 
-
-
-
-
-
-
